@@ -756,7 +756,7 @@ int main(const uint32_t argc, const char** argv)
 	//INITIALIZE SECTION
 	//1: Window Create 
 	//actually should maybe do this after we pick the physical device so that window creation isn't stepping all over our console i0
-	GLFWwindow* pMyWindow = create_GLFWwindow();  //do i really need to do this first...
+	GLFWwindow* pMyWindow = init_create_GLFWwindow();  //do i really need to do this first...
 
 	//2: VkInstance Create
 	uint32_t n_BaseRequiredEXTs = 0;
@@ -795,7 +795,7 @@ int main(const uint32_t argc, const char** argv)
 	destroy_Instance(hInstance, NULL);
 
 	//1: Window Destroy:
-	destroy_GLFWwindow(pMyWindow);
+	destroy_terminate_GLFWwindow(pMyWindow);
 
 	return 0;
 }

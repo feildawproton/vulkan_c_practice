@@ -7,14 +7,14 @@ const char* WINDOW_NAME = "Hello Window";
 #define WINDOW_SHARE NULL
 
 //BEGIN SECTION: GLFW WINDOW CREATE DESTROY
-GLFWwindow* create_GLFWwindow()
+GLFWwindow* init_create_GLFWwindow()
 {
 	glfwInit();
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 	return glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME, WINDOW_MONITOR, WINDOW_SHARE);
 }
-void destroy_GLFWwindow(GLFWwindow* pMyWindow)
+void destroy_terminate_GLFWwindow(GLFWwindow* pMyWindow)
 {
 	glfwDestroyWindow(pMyWindow);
 	glfwTerminate();

@@ -7,8 +7,8 @@
 #endif // !GLFW_INCLUDE_VULKAN
 
 //BEGIN SECTION: GLFW WINDOW CREATE DESTROY
-GLFWwindow* create_GLFWwindow();
-void destroy_GLFWwindow(GLFWwindow* pMyWindow);
+GLFWwindow* init_create_GLFWwindow();
+void destroy_terminate_GLFWwindow(GLFWwindow* pMyWindow);
 //END SECTION: GLFW WINDOW CREATE DESTROY
 
 
