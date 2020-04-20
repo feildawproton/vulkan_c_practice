@@ -8,25 +8,8 @@
 
 #define DEBUG
 
-//the below flag is for runtime checks of debug status in code, instead of compile time checks
-typedef enum
-{
-	RT_RELEASE = 0,
-	RT_DEBUG = 1
-}RtDebug;
-#ifdef DEBUG
-const RtDebug RT_DEBUG_FLAG = RT_DEBUG;
-#else
-const RtDebug RT_DEBUG_FLAG = RT_RELEASE;
-#endif // DEBUG
-
-
-
-const uint32_t WINDOW_WIDTH = 800;
-const uint32_t WINDOW_HEIGHT = 600;
-const char* WINDOW_NAME = "Hello Window";
-#define WINDOW_MONITOR NULL
-#define WINDOW_SHARE NULL
+#include "debug_settings.h"
+#include "vg_setup.h"
 
 //application info
 const char* APPLICATION_NAME = "Hello Triangle";
@@ -646,20 +629,7 @@ VkDeviceQueueCreateInfo fill_QueueInfo(VkPhysicalDevice hDevice)
 }
 //END SECTION: QUEUE AND LOGICAL DEVICE
 
-//BEGIN SECTION: GLFW WINDOW CREATE DESTROY
-GLFWwindow* create_GLFWwindow()
-{
-	glfwInit();
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-	return glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME, WINDOW_MONITOR, WINDOW_SHARE);
-}
-void destroy_GLFWwindow(GLFWwindow* pMyWindow)
-{
-	glfwDestroyWindow(pMyWindow);
-	glfwTerminate();
-}
-//END SECTION: GLFW WINDOW CREATE DESTROY
+
 
 //BEGIN SECTION: VULKAN INSTANCE CREATE DESTROY
 VkInstance create_Instance(VkAllocationCallbacks* pAllocator, uint32_t n_BaseRequiredEXTs, const char** names_BaseRequiredExts)
@@ -825,7 +795,7 @@ int main(const uint32_t argc, const char** argv)
 	destroy_Instance(hInstance, NULL);
 
 	//1: Window Destroy:
-	glfwDestroyWindow(pMyWindow);
+	destroy_GLFWwindow(pMyWindow);
 
 	return 0;
 }
