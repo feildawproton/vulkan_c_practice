@@ -1,16 +1,14 @@
 ﻿  trainangle_in_main.c
-E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\vg_setup.h(19,59): warning C4047:  'return': 'const char *' differs in levels of indirection from 'const char **'
-E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(335,10): warning C4477:  'printf' : format string '%hhu' requires an argument of type 'unsigned int', but variadic argument 1 has type 'uint8_t *'
-E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(335,10): warning C4313:  'printf': '%u' in format string conflicts with argument 1 of type 'uint8_t *'
-E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(368,125): warning C4474:  'printf' : too many arguments passed for format string
-E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(368,125): message :  placeholders and their parameters expect 2 variadic arguments, but 3 were provided
-E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(404,1): warning C4090:  'initializing': different 'const' qualifiers
-E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(441,16): warning C4018:  '>=': signed/unsigned mismatch
-E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(557,1): warning C4047:  'initializing': 'VkInstanceCreateFlags' differs in levels of indirection from 'void *'
-E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(600,61): warning C4090:  '=': different 'const' qualifiers
-  vg_window_setup.c
-E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(756,1): warning C4090:  'initializing': different 'const' qualifiers
+E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(344,10): warning C4477:  'printf' : format string '%hhu' requires an argument of type 'unsigned int', but variadic argument 1 has type 'uint8_t *'
+E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(344,10): warning C4313:  'printf': '%u' in format string conflicts with argument 1 of type 'uint8_t *'
+E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(377,125): warning C4474:  'printf' : too many arguments passed for format string
+E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(377,125): message :  placeholders and their parameters expect 2 variadic arguments, but 3 were provided
+E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(413,1): warning C4090:  'initializing': different 'const' qualifiers
+E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(450,16): warning C4018:  '>=': signed/unsigned mismatch
+E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(485,1): warning C4047:  'initializing': 'VkInstanceCreateFlags' differs in levels of indirection from 'void *'
+  vg_debugmessenger.c
+  vg_window.c
   Generating Code...
-E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\vg_setup.h(19,59): warning C4047:  'return': 'const char *' differs in levels of indirection from 'const char **'
-E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(622): warning C4716:  'fill_QueueInfo': must return a value
+E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(528,61): warning C4090:  '=': different 'const' qualifiers
+E:\git_projects\vulkanpractice\vulkan_c_practice\traingleagain\trainangle_in_main.c(550): warning C4716:  'fill_QueueInfo': must return a value
   traingleagain.vcxproj -> E:\git_projects\vulkanpractice\vulkan_c_practice\x64\Debug\traingleagain.exe

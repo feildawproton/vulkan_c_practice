@@ -8,8 +8,28 @@
 
 #define DEBUG
 
-#include "debug_settings.h"
 #include "vg_setup.h"
+
+
+
+//the below flag is for runtime checks of debug status in code, instead of compile time checks
+typedef enum
+{
+	RT_RELEASE = 0,
+	RT_DEBUG = 1
+}RtDebug;
+
+#ifdef DEBUG
+static const RtDebug RT_DEBUG_FLAG = RT_DEBUG;
+#else
+static const RtDebug RT_DEBUG_FLAG = RT_RELEASE;
+#endif // DEBUG
+
+typedef enum
+{
+	MISSING = 0,
+	PRESENT = 1
+}Presence;
 
 //application info
 const char* APPLICATION_NAME = "Hello Triangle";
@@ -25,17 +45,6 @@ const char** NAMES_ENABLED_LAYERS_RELEASE;
 //Instance create info debug
 const uint32_t N_ENABLED_LAYERS_DEBUG = 1;
 const char* NAMES_ENABLED_LAYERS_DEBUG[] = { "VK_LAYER_KHRONOS_validation" };
-
-//debug messenger info
-#define MESSAGE_SEVERITY VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT
-#define MESSAGE_TYPE VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT
-
-
-typedef enum
-{
-	MISSING = 0,
-	PRESENT = 1
-}NomNom;
 
 
 //going to use SoA for this.  If not required tis good practice.  right?
@@ -389,7 +398,7 @@ void print_DeviceUsage(hDeviceQueueFamiliesUsage hDeviceUsage)
 //END SECTION: SOME PRINTS
 
 //BEGIN SECTION: CHECKS
-NomNom check_ValidationLayers()
+Presence check_ValidationLayers()
 {
 	uint32_t n_VAL = 0;
 	VkResult rezzy = vkEnumerateInstanceLayerProperties(&n_VAL, NULL);
@@ -397,10 +406,10 @@ NomNom check_ValidationLayers()
 	vkEnumerateInstanceLayerProperties(&n_VAL, pLayers);
 
 	//outloop through requested layers
-	NomNom AllLayersPresent = PRESENT;
+	Presence AllLayersPresent = PRESENT;
 	for (uint32_t i = 0; i < N_ENABLED_LAYERS_DEBUG; i++)
 	{
-		NomNom LayerPresent = MISSING;
+		Presence LayerPresent = MISSING;
 		char* Requested_Layer_i = NAMES_ENABLED_LAYERS_DEBUG[i];
 		for (uint32_t j = 0; j < n_VAL; j++)
 		{
@@ -454,88 +463,7 @@ VkPhysicalDevice select_UserGPU(VkInstance hInstance)
 }
 //END SECTION: SELECTIONS
 
-//BEGIN SECTION: DEBUG MESSENGER 
-static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-	VkDebugUtilsMessageTypeFlagsEXT messageType,
-	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-	void* pUserData)
-{
-	//mostly strait up copied Overvoorde here (including the description)
 
-	//VkDebugUtilsMessageSeverityFlagBitsEXT specifies the 
-	//typedef enum VkDebugUtilsMessageSeverityFlagBitsEXT {
-	//	VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT = 0x00000001,
-	//	VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT = 0x00000010,
-	//	VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT = 0x00000100,
-	//	VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT = 0x00001000,
-	//	VK_DEBUG_UTILS_MESSAGE_SEVERITY_FLAG_BITS_MAX_ENUM_EXT = 0x7FFFFFFF
-	//} VkDebugUtilsMessageSeverityFlagBitsEXT;
-	//so bigger numbers are worse
-
-	//typedef VkFlags VkDebugUtilsMessageTypeFlagsEXT;
-	//typedef enum VkDebugUtilsMessageTypeFlagBitsEXT {
-	//	VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT = 0x00000001,
-	//	VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT = 0x00000002,
-	//	VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT = 0x00000004,
-	//	VK_DEBUG_UTILS_MESSAGE_TYPE_FLAG_BITS_MAX_ENUM_EXT = 0x7FFFFFFF
-	//} VkDebugUtilsMessageTypeFlagBitsEXT;
-
-	//typedef struct VkDebugUtilsMessengerCallbackDataEXT {
-	//	VkStructureType                              sType;
-	//	const void*                                  pNext;
-	//	VkDebugUtilsMessengerCallbackDataFlagsEXT    flags;
-	//	const char*                                  pMessageIdName;
-	//	int32_t                                      messageIdNumber;
-	//	const char*                                  pMessage;                //the message with a null terminated string
-	//	uint32_t                                     queueLabelCount;
-	//	const VkDebugUtilsLabelEXT*                  pQueueLabels;
-	//	uint32_t                                     cmdBufLabelCount;
-	//	const VkDebugUtilsLabelEXT*                  pCmdBufLabels;
-	//	uint32_t                                     objectCount;             //number of the vulkan objects
-	//	const VkDebugUtilsObjectNameInfoEXT*         pObjects;                //array of vulkan objects
-	//} VkDebugUtilsMessengerCallbackDataEXT;
-
-	//void* pUserData 
-
-	printf("\n\nValidation Layer: %s", pCallbackData->pMessage);
-	return VK_FALSE;  //typically we just return false unless we are testing the validation layers themselves, which i am in no way qualified to do
-}
-VkDebugUtilsMessengerCreateInfoEXT fill_DebugMessengerInfo()
-{
-	VkDebugUtilsMessengerCreateInfoEXT DebugMessenger =
-	{
-		.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
-		.pNext = NULL,
-		.flags = 0,  //this one is zero according the docs, it is NULL for most of the other structure that I've filled out so far
-		.messageSeverity = MESSAGE_SEVERITY,  //bitmask of VkDebugUtilsMessageSeverityFlagBitsEXT which severity will trigger?
-		.messageType = MESSAGE_TYPE, //bitmask of VkDebugUtilsMessageTypeFlagBitsEXT which types will trigger?
-		.pfnUserCallback = debugCallback,  //dat function
-		.pUserData = NULL //optional
-	};
-	//this structure should be passed to the vkCreateDebugUtilsMessengerEXT function to create the VkDebugUtilsMessengerEXT object
-	//this function is an extension function so it is not automatically loaded :(
-	//that is why we have to call the vkGetInstanceProcAddr thing
-	return DebugMessenger;
-}
-VkResult create_DebugUtilsMessengerEXT(VkInstance hInstance,
-	const VkDebugUtilsMessengerCreateInfoEXT* pDebugMessengerInfo,
-	const VkAllocationCallbacks* pAllocator,
-	VkDebugUtilsMessengerEXT* pDebugMessenger)
-{
-	//our goal here is to load the vkCreateDebugUtilsMessengerEXT
-	PFN_vkCreateDebugUtilsMessengerEXT Function = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(hInstance, "vkCreateDebugUtilsMessengerEXT");
-
-	if (Function == NULL)
-	{
-#ifdef DEBUG
-		printf("\nWe failed to load the extension!!!  aaaahhhhh!!!!");
-#endif // DEBUG
-		return VK_ERROR_EXTENSION_NOT_PRESENT;
-	}
-	else
-		return Function(hInstance, pDebugMessengerInfo, pAllocator, pDebugMessenger);
-}
-//END SENCTION: DEBUG MESSENGER
 
 //BEGIN SECTION: VULKAN INSTANCE STRUCTURES
 VkApplicationInfo fill_AppInfo()
@@ -569,7 +497,7 @@ VkInstanceCreateInfo fill_CreateInfo(VkApplicationInfo* pAppInfo, uint32_t n_Bas
 }
 void addValidation_CreateInfo(VkInstanceCreateInfo* pCreateInfo)
 {
-	NomNom LayersPresent = check_ValidationLayers();
+	Presence LayersPresent = check_ValidationLayers();
 #ifdef DEBUG
 	if (LayersPresent != PRESENT)
 		printf("\nrequested validation layers where not found");
@@ -655,23 +583,7 @@ _inline destroy_Instance(VkInstance hInstance, const VkAllocationCallbacks* pAll
 }
 //END SECTION: VULKAN ISNTANCE CREATE DESTROY
 
-//BEGINE SECTION: DEBUG MESSENGER CREATE DESTROY
-VkDebugUtilsMessengerEXT create_DebugMessenger(VkInstance hInstance, const VkAllocationCallbacks* pAllocator)
-{
-	//oh shit here we go
-	VkDebugUtilsMessengerCreateInfoEXT DebugMessengerInfo = fill_DebugMessengerInfo();
-	VkDebugUtilsMessengerEXT DebugMessenger;
-	VkResult rezzy = create_DebugUtilsMessengerEXT(hInstance, &DebugMessengerInfo, pAllocator, &DebugMessenger);
-	assert(rezzy == VK_SUCCESS);
-	return DebugMessenger;
-}
-void destroy_DebugMessenger(VkInstance hInstance, VkDebugUtilsMessengerEXT DebugMessenger, const VkAllocationCallbacks* pAllocator)
-{
-	PFN_vkDestroyDebugUtilsMessengerEXT Function = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(hInstance, "vkDestroyDebugUtilsMessengerEXT");
-	if (Function != NULL)
-		Function(hInstance, DebugMessenger, pAllocator);
-}
-//END SECTION: DEBUG MESSENGER CREATE DESTROY
+
 
 
 //BEGIN SECTION: CREATE LOGICAL DEVICE
