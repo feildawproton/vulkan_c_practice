@@ -415,14 +415,7 @@ NomNom check_ValidationLayers()
 }
 //END SECTION: CHECKs
 
-//BEGIN SECTION: GETS
-const char* get_RequiredExtension(uint32_t* pn_RequiredEXTs)
-{
-	//this is based on the assumption of glfw of course... 
-	//could add a check and blah blah blah
-	return glfwGetRequiredInstanceExtensions(pn_RequiredEXTs);
-}
-//END SECTION: GETS
+
 
 //BEGIN SECTION: SELECTIONS
 VkPhysicalDevice select_UserGPU(VkInstance hInstance)
@@ -760,7 +753,7 @@ int main(const uint32_t argc, const char** argv)
 
 	//2: VkInstance Create
 	uint32_t n_BaseRequiredEXTs = 0;
-	const char** names_BaseRequiredEXTs = get_RequiredExtension(&n_BaseRequiredEXTs);
+	const char** names_BaseRequiredEXTs = get_GLFWExtension(&n_BaseRequiredEXTs);
 	VkInstance hInstance = create_Instance(NULL, n_BaseRequiredEXTs, names_BaseRequiredEXTs);  //there will be a debug messenger here that is different than the one that we create below
 
 	//3: DebugMessenger Create
