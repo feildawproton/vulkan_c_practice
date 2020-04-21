@@ -47,31 +47,7 @@ const uint32_t N_ENABLED_LAYERS_DEBUG = 1;
 const char* NAMES_ENABLED_LAYERS_DEBUG[] = { "VK_LAYER_KHRONOS_validation" };
 
 
-//going to use SoA for this.  If not required tis good practice.  right?
-struct DeviceQueueFamiliesUsage
-{
-	//capabilities:
-	uint32_t N_QueueFamilies;
-	VkQueueFlags* QueueFlags;  //use this and the reference below to check capabilities when assigning queues
-	uint32_t* pMaxQ;
-	//in use:
-	uint32_t* pN_Graphics;
-	uint32_t* pN_Compute;
-	uint32_t* pN_Transfer;
-	uint32_t* pN_Sparse;
-	uint32_t* pN_Protected;
 
-	//for reference when checking for capabilities
-	//typedef enum VkQueueFlagBits {
-	//	VK_QUEUE_GRAPHICS_BIT = 0x00000001,
-	//	VK_QUEUE_COMPUTE_BIT = 0x00000002,
-	//	VK_QUEUE_TRANSFER_BIT = 0x00000004,
-	//	VK_QUEUE_SPARSE_BINDING_BIT = 0x00000008,
-	//	VK_QUEUE_PROTECTED_BIT = 0x00000010,
-	//	VK_QUEUE_FLAG_BITS_MAX_ENUM = 0x7FFFFFFF
-	//} VkQueueFlagBits;
-};
-typedef struct DeviceQueueFamiliesUsage* hDeviceQueueFamiliesUsage;
 
 //BEGIN SECTION: SOME PRINTS
 void print_availableEXT()
@@ -369,7 +345,7 @@ void print_availableDevices_v1_1(VkInstance hInstance)
 	}
 	free(pDevices);
 }
-void print_DeviceUsage(hDeviceQueueFamiliesUsage hDeviceUsage)
+void print_DeviceUsage(hVgDeviceQueueFamiliesUsage hDeviceUsage)
 {
 	printf("\n\nPrinting current queue usage of devie:");
 	for (uint32_t i = 0; i < hDeviceUsage->N_QueueFamilies; i++)
@@ -589,52 +565,9 @@ _inline destroy_Instance(VkInstance hInstance, const VkAllocationCallbacks* pAll
 //BEGIN SECTION: CREATE LOGICAL DEVICE
 
 //END SECTION: CREATE LOGICAL DEVICE
-//this is to track usage.  Hopefully I will remember to require all functions that create queues to require this struct
-//don't think I need to take the address of the device because it is already a handle
-hDeviceQueueFamiliesUsage create_DeviceUsageTracker(VkPhysicalDevice hDevice)
-{
-	//need to stack allocate this struct if i want to return an address to it
-	hDeviceQueueFamiliesUsage hDeviceUsage = malloc(sizeof(struct DeviceQueueFamiliesUsage));
 
-	uint32_t count_qFamilies = 0;
-	vkGetPhysicalDeviceQueueFamilyProperties(hDevice, &count_qFamilies, NULL);
-	VkQueueFamilyProperties* pQFamiliesProperties = malloc(sizeof(VkQueueFamilyProperties) * count_qFamilies);
-	vkGetPhysicalDeviceQueueFamilyProperties(hDevice, &count_qFamilies, pQFamiliesProperties);
 
-	hDeviceUsage->N_QueueFamilies = count_qFamilies;
-	hDeviceUsage->QueueFlags = malloc(sizeof(VkQueueFlags) * count_qFamilies);
-	hDeviceUsage->pMaxQ = malloc(sizeof(uint32_t) * count_qFamilies);
-	hDeviceUsage->pN_Graphics = malloc(sizeof(uint32_t) * count_qFamilies);
-	hDeviceUsage->pN_Compute = malloc(sizeof(uint32_t) * count_qFamilies);
-	hDeviceUsage->pN_Transfer = malloc(sizeof(uint32_t) * count_qFamilies);
-	hDeviceUsage->pN_Sparse = malloc(sizeof(uint32_t) * count_qFamilies);
-	hDeviceUsage->pN_Protected = malloc(sizeof(uint32_t) * count_qFamilies);
 
-	for (uint32_t i = 0; i < count_qFamilies; i++)
-	{
-		hDeviceUsage->QueueFlags[i] = pQFamiliesProperties[i].queueFlags;
-		hDeviceUsage->pMaxQ[i] = pQFamiliesProperties[i].queueCount;
-		hDeviceUsage->pN_Graphics[i] = 0;
-		hDeviceUsage->pN_Compute[i] = 0;
-		hDeviceUsage->pN_Transfer[i] = 0;
-		hDeviceUsage->pN_Sparse[i] = 0;
-		hDeviceUsage->pN_Protected[i] = 0;
-	}
-
-	free(pQFamiliesProperties);
-
-	return hDeviceUsage;
-}
-void destroy_DeviceUsageTracker(hDeviceQueueFamiliesUsage hDeviceUsage)
-{
-	free(hDeviceUsage->QueueFlags);
-	free(hDeviceUsage->pMaxQ);
-	free(hDeviceUsage->pN_Graphics);
-	free(hDeviceUsage->pN_Compute);
-	free(hDeviceUsage->pN_Transfer);
-	free(hDeviceUsage->pN_Sparse);
-	free(hDeviceUsage->pN_Protected);
-}
 
 //VkQueueFlags is a bitmask type for 0 or more VkQueueFlagBits
 void create_LogicalDevice(VkQueueFlags Flags)
@@ -679,7 +612,7 @@ int main(const uint32_t argc, const char** argv)
 	VkPhysicalDevice hDevice = select_UserGPU(hInstance);
 
 	//5: Create Logical Device
-	hDeviceQueueFamiliesUsage hDeviceUsage = create_DeviceUsageTracker(hDevice);
+	hVgDeviceQueueFamiliesUsage hDeviceUsage = create_DeviceUsageTracker(hDevice);
 	print_DeviceUsage(hDeviceUsage);
 
 	//MAIN LOOP

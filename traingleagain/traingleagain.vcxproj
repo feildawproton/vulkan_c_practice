@@ -137,6 +137,7 @@
   <ItemGroup>
     <ClCompile Include="trainangle_in_main.c" />
     <ClCompile Include="vg_debugmessenger.c" />
+    <ClCompile Include="vg_deviceusagetracker.c" />
     <ClCompile Include="vg_window.c" />
   </ItemGroup>
   <ItemGroup>

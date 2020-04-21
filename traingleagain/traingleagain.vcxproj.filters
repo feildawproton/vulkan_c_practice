@@ -24,6 +24,9 @@
     <ClCompile Include="vg_debugmessenger.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="vg_deviceusagetracker.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vg_setup.h">
