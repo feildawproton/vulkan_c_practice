@@ -6,32 +6,8 @@
 #include <stdlib.h> //forgot about malloc
 #include <assert.h>
 
-#define DEBUG
-
+#include "debug_settings.h"
 #include "vg_setup.h"
-
-typedef enum
-{
-	MISSING = 0,
-	PRESENT = 1
-}Presence;
-
-//application info
-const char* APPLICATION_NAME = "Hello Triangle";
-#define APPLICATION_VERSION VK_MAKE_VERSION(0, 0, 0)
-const char* ENGINE_NAME = "No engine";
-#define ENGINE_VERSION VK_MAKE_VERSION(0, 0, 0)
-#define API_VERSION VK_API_VERSION_1_1
-
-//Instance create Info release
-const uint32_t N_ENABLED_LAYERS_RELEASE = 0;
-const char** NAMES_ENABLED_LAYERS_RELEASE;
-
-//Instance create info debug
-const uint32_t N_ENABLED_LAYERS_DEBUG = 1;
-const char* NAMES_ENABLED_LAYERS_DEBUG[] = { "VK_LAYER_KHRONOS_validation" };
-
-
 
 
 //BEGIN SECTION: SOME PRINTS
@@ -359,32 +335,7 @@ void print_DeviceUsage(hVgDeviceQueueFamiliesUsage hDeviceUsage)
 }
 //END SECTION: SOME PRINTS
 
-//BEGIN SECTION: CHECKS
-Presence check_ValidationLayers()
-{
-	uint32_t n_VAL = 0;
-	VkResult rezzy = vkEnumerateInstanceLayerProperties(&n_VAL, NULL);
-	VkLayerProperties* pLayers = malloc(sizeof(VkLayerProperties) * n_VAL);
-	vkEnumerateInstanceLayerProperties(&n_VAL, pLayers);
 
-	//outloop through requested layers
-	Presence AllLayersPresent = PRESENT;
-	for (uint32_t i = 0; i < N_ENABLED_LAYERS_DEBUG; i++)
-	{
-		Presence LayerPresent = MISSING;
-		char* Requested_Layer_i = NAMES_ENABLED_LAYERS_DEBUG[i];
-		for (uint32_t j = 0; j < n_VAL; j++)
-		{
-			char* Available_jth = pLayers[j].layerName;
-			if (strcmp(Requested_Layer_i, Available_jth) == 0)
-				LayerPresent = PRESENT;
-		}
-		if (LayerPresent == MISSING)
-			AllLayersPresent = MISSING;
-	}
-	return AllLayersPresent;
-}
-//END SECTION: CHECKs
 
 
 
@@ -426,85 +377,6 @@ VkPhysicalDevice select_UserGPU(VkInstance hInstance)
 //END SECTION: SELECTIONS
 
 
-
-//BEGIN SECTION: VULKAN INSTANCE STRUCTURES
-VkApplicationInfo fill_AppInfo()
-{
-	VkApplicationInfo AppInfo =
-	{
-		.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
-		.pNext = NULL,
-		.pApplicationName = APPLICATION_NAME,
-		.applicationVersion = APPLICATION_VERSION,
-		.pEngineName = ENGINE_NAME,
-		.engineVersion = ENGINE_VERSION,
-		.apiVersion = API_VERSION
-	};
-	return AppInfo;
-}
-VkInstanceCreateInfo fill_CreateInfo(VkApplicationInfo* pAppInfo, uint32_t n_BaseRequiredEXTs, const char** names_BaseRequiredExts)
-{
-	VkInstanceCreateInfo CreateInfo =
-	{
-		.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO,
-		.pNext = NULL,
-		.flags = NULL,
-		.pApplicationInfo = pAppInfo,
-		.enabledLayerCount = N_ENABLED_LAYERS_RELEASE,
-		.ppEnabledLayerNames = NAMES_ENABLED_LAYERS_RELEASE,
-		.enabledExtensionCount = n_BaseRequiredEXTs,
-		.ppEnabledExtensionNames = names_BaseRequiredExts
-	};
-	return CreateInfo;
-}
-void addValidation_CreateInfo(VkInstanceCreateInfo* pCreateInfo)
-{
-	Presence LayersPresent = check_ValidationLayers();
-#ifdef DEBUG
-	if (LayersPresent != PRESENT)
-		printf("\nrequested validation layers where not found");
-#endif // DEBUG
-	assert(LayersPresent == PRESENT);
-	pCreateInfo->enabledLayerCount = N_ENABLED_LAYERS_DEBUG;
-	pCreateInfo->ppEnabledLayerNames = NAMES_ENABLED_LAYERS_DEBUG;
-}
-void addDebugExtensions_CreateInfo(VkInstanceCreateInfo* pCreateInfo)
-{
-	//this debug messenger is seperate from the one that we use after instance creation
-#ifdef DEBUG
-	printf("\n\nPrinting requested extensions before requesting VK_EXT_DEBUG_UTILS_EXTENSION_NAME:");
-	for (uint32_t i = 0; i < pCreateInfo->enabledExtensionCount; i++)
-	{
-		printf("\n\t%s", pCreateInfo->ppEnabledExtensionNames[i]);
-	}
-#endif // DEBUG
-
-	uint32_t n_oldExts = pCreateInfo->enabledExtensionCount;
-	uint32_t n_newExts = n_oldExts + 1;
-
-	//WAIT am I causing a memory leak here.  Probably :( 
-	char** Names_NewExts = malloc(sizeof(char*) * n_newExts); //I malloced here so need to free...
-	//loop through through the old extensions
-	for (uint32_t i = 0; i < n_oldExts; i++)
-	{
-		Names_NewExts[i] = pCreateInfo->ppEnabledExtensionNames[i];
-	}
-	Names_NewExts[n_newExts - 1] = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;  //adding this one
-
-	//alright let's set that stuff
-	pCreateInfo->enabledExtensionCount = n_newExts;
-	pCreateInfo->ppEnabledExtensionNames = Names_NewExts;
-#ifdef DEBUG
-	printf("\n\nPrinting requested extensions after adding VK_EXT_DEBUG_UTILS_EXTENSION_NAME");
-	for (uint32_t i = 0; i < n_newExts; i++)
-	{
-		printf("\n\t%s", pCreateInfo->ppEnabledExtensionNames[i]);
-	}
-#endif // DEBUG
-
-}
-//END SECTION: VULKAN INSTANCE STRUCTURES
-
 //BEGIN SECTION: QUEUE AND LOGICAL DEVICE STRUCTURES
 VkDeviceQueueCreateInfo fill_QueueInfo(VkPhysicalDevice hDevice)
 {
@@ -513,40 +385,6 @@ VkDeviceQueueCreateInfo fill_QueueInfo(VkPhysicalDevice hDevice)
 //END SECTION: QUEUE AND LOGICAL DEVICE
 
 
-
-//BEGIN SECTION: VULKAN INSTANCE CREATE DESTROY
-VkInstance create_Instance(VkAllocationCallbacks* pAllocator, uint32_t n_BaseRequiredEXTs, const char** names_BaseRequiredExts)
-{
-	VkApplicationInfo AppInfo = fill_AppInfo();
-	VkInstanceCreateInfo CreateInfo = fill_CreateInfo(&AppInfo, n_BaseRequiredEXTs, names_BaseRequiredExts);
-#ifdef DEBUG
-	addValidation_CreateInfo(&CreateInfo);  //adding the required validaiton layer(s)
-	addDebugExtensions_CreateInfo(&CreateInfo);
-
-	//this is separate from the debug messenger created and destroyed after instance initialization
-	VkDebugUtilsMessengerCreateInfoEXT DebugMessenger_InstanceCreation = fill_DebugMessengerInfo();
-	CreateInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)& DebugMessenger_InstanceCreation;
-
-	VkInstance hInstance;
-	VkResult rezzy = vkCreateInstance(&CreateInfo, pAllocator, &hInstance);
-
-	if (rezzy != VK_SUCCESS)
-		printf("\nInstance creation failed!");
-	else
-		printf("\n\nyay");
-#else
-	VkInstance hInstance;
-	VkResult rezzy = vkCreateInstance(&CreateInfo, pAllocator, &hInstance);
-#endif // DEBUG
-
-	assert(rezzy == VK_SUCCESS);  //nothing wrond with being assertive here I think
-	return hInstance;
-}
-_inline destroy_Instance(VkInstance hInstance, const VkAllocationCallbacks* pAllocator)
-{
-	vkDestroyInstance(hInstance, pAllocator);
-}
-//END SECTION: VULKAN ISNTANCE CREATE DESTROY
 
 //VkQueueFlags is a bitmask type for 0 or more VkQueueFlagBits
 void create_LogicalDevice(VkQueueFlags Flags)
@@ -571,27 +409,23 @@ int main(const uint32_t argc, const char** argv)
 
 
 	//INITIALIZE SECTION
-	//1: Window Create 
-	//actually should maybe do this after we pick the physical device so that window creation isn't stepping all over our console i0
-	GLFWwindow* pMyWindow = init_create_GLFWwindow();  //do i really need to do this first...
+	//1
+	GLFWwindow* pMyWindow = vgInitCreate_GLFWwindow();  //do i really need to do this first...
 
-	//2: VkInstance Create
+	//2
 	uint32_t n_BaseRequiredEXTs = 0;
 	const char** names_BaseRequiredEXTs = get_GLFWExtension(&n_BaseRequiredEXTs);
-	VkInstance hInstance = create_Instance(NULL, n_BaseRequiredEXTs, names_BaseRequiredEXTs);  //there will be a debug messenger here that is different than the one that we create below
+	VkInstance hInstance = vgCreate_Instance(NULL, n_BaseRequiredEXTs, names_BaseRequiredEXTs);  //there will be a debug messenger here that is different than the one that we create below
 
-	//3: DebugMessenger Create
-	//this is separate one than the one that we create for initializing the vulkan instance
-	VkDebugUtilsMessengerEXT DebugMessenger = create_DebugMessenger(hInstance, NULL);
+	//3
+	VkDebugUtilsMessengerEXT DebugMessenger = vgCreate_DebugMessenger(hInstance, NULL);
 
-	//:4 Select Physical Device
-	//Im not going to do any selection logic here, just print the stuff
-	//we'll want to check for a graphics queue, best specs, neccessary shaders (geometry in the fist example "triangle")
+	//:4 Select Physical
 	print_availableDevices_v1_1(hInstance);
 	VkPhysicalDevice hDevice = select_UserGPU(hInstance);
 
 	//5: Create Logical Device
-	hVgDeviceQueueFamiliesUsage hDeviceUsage = create_DeviceUsageTracker(hDevice);
+	hVgDeviceQueueFamiliesUsage hDeviceUsage = vgCreate_DeviceUsageTracker(hDevice);
 	print_DeviceUsage(hDeviceUsage);
 
 	//MAIN LOOP
@@ -601,18 +435,18 @@ int main(const uint32_t argc, const char** argv)
 	//CLEANUP SECTION
 
 	//5:
-	destroy_DeviceUsageTracker(hDeviceUsage);
+	vgDestroy_DeviceUsageTracker(hDeviceUsage);
 
 
 	//4: Unpick the physical device...
 
 	//3: DebugMessenger Destroy
-	destroy_DebugMessenger(hInstance, DebugMessenger, NULL);
+	vgDestroy_DebugMessenger(hInstance, DebugMessenger, NULL);
 	//2: VkInstance Destroy
-	destroy_Instance(hInstance, NULL);
+	vgDestroy_Instance(hInstance, NULL);
 
 	//1: Window Destroy:
-	destroy_terminate_GLFWwindow(pMyWindow);
+	vgDestroyTerminate_GLFWwindow(pMyWindow);
 
 	return 0;
 }

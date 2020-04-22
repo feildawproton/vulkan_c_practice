@@ -12,7 +12,7 @@
 
 
 //DEBUG MESSENGER 
-static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+static VKAPI_ATTR VkBool32 VKAPI_CALL vgSet_debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 	VkDebugUtilsMessageTypeFlagsEXT messageType,
 	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 	void* pUserData)
@@ -23,7 +23,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityF
 	return VK_FALSE;  //typically we just return false unless we are testing the validation layers themselves, which i am in no way qualified to do
 }
 
-VkDebugUtilsMessengerCreateInfoEXT fill_DebugMessengerInfo()
+VkDebugUtilsMessengerCreateInfoEXT vgSet_DebugMessengerInfo()
 {
 	VkDebugUtilsMessengerCreateInfoEXT DebugMessenger =
 	{
@@ -32,7 +32,7 @@ VkDebugUtilsMessengerCreateInfoEXT fill_DebugMessengerInfo()
 		.flags = 0,  //this one is zero according the docs, it is NULL for most of the other structure that I've filled out so far
 		.messageSeverity = MESSAGE_SEVERITY,  //bitmask of VkDebugUtilsMessageSeverityFlagBitsEXT which severity will trigger?
 		.messageType = MESSAGE_TYPE, //bitmask of VkDebugUtilsMessageTypeFlagBitsEXT which types will trigger?
-		.pfnUserCallback = debugCallback,  //dat function
+		.pfnUserCallback = vgSet_debugCallback,  //dat function
 		.pUserData = NULL //optional
 	};
 	//this structure should be passed to the vkCreateDebugUtilsMessengerEXT function to create the VkDebugUtilsMessengerEXT object
@@ -41,7 +41,7 @@ VkDebugUtilsMessengerCreateInfoEXT fill_DebugMessengerInfo()
 	return DebugMessenger;
 }
 
-VkResult create_DebugUtilsMessengerEXT(VkInstance hInstance,
+VkResult vgSet_DebugUtilsMessengerEXT(VkInstance hInstance,
 	const VkDebugUtilsMessengerCreateInfoEXT* pDebugMessengerInfo,
 	const VkAllocationCallbacks* pAllocator,
 	VkDebugUtilsMessengerEXT* pDebugMessenger)
@@ -62,16 +62,16 @@ VkResult create_DebugUtilsMessengerEXT(VkInstance hInstance,
 
 
 //CREATE DESTROY
-VkDebugUtilsMessengerEXT create_DebugMessenger(VkInstance hInstance, const VkAllocationCallbacks* pAllocator)
+VkDebugUtilsMessengerEXT vgCreate_DebugMessenger(VkInstance hInstance, const VkAllocationCallbacks* pAllocator)
 {
 	//oh shit here we go
-	VkDebugUtilsMessengerCreateInfoEXT DebugMessengerInfo = fill_DebugMessengerInfo();
+	VkDebugUtilsMessengerCreateInfoEXT DebugMessengerInfo = vgSet_DebugMessengerInfo();
 	VkDebugUtilsMessengerEXT DebugMessenger;
-	VkResult rezzy = create_DebugUtilsMessengerEXT(hInstance, &DebugMessengerInfo, pAllocator, &DebugMessenger);
+	VkResult rezzy = vgSet_DebugUtilsMessengerEXT(hInstance, &DebugMessengerInfo, pAllocator, &DebugMessenger);
 	assert(rezzy == VK_SUCCESS);
 	return DebugMessenger;
 }
-void destroy_DebugMessenger(VkInstance hInstance, VkDebugUtilsMessengerEXT DebugMessenger, const VkAllocationCallbacks* pAllocator)
+void vgDestroy_DebugMessenger(VkInstance hInstance, VkDebugUtilsMessengerEXT DebugMessenger, const VkAllocationCallbacks* pAllocator)
 {
 	PFN_vkDestroyDebugUtilsMessengerEXT Function = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(hInstance, "vkDestroyDebugUtilsMessengerEXT");
 	if (Function != NULL)

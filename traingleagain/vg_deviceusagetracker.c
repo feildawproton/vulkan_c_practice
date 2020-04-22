@@ -4,7 +4,7 @@
 
 //this is to track usage.  Hopefully I will remember to require all functions that create queues to require this struct
 //don't think I need to take the address of the device because it is already a handle
-hVgDeviceQueueFamiliesUsage create_DeviceUsageTracker(VkPhysicalDevice hDevice)
+hVgDeviceQueueFamiliesUsage vgCreate_DeviceUsageTracker(VkPhysicalDevice hDevice)
 {
 	//i want to return a pointer so allocate
 	hVgDeviceQueueFamiliesUsage hDeviceUsage = (hVgDeviceQueueFamiliesUsage)malloc(sizeof(struct VgDeviceQueueFamiliesUsage));
@@ -38,7 +38,7 @@ hVgDeviceQueueFamiliesUsage create_DeviceUsageTracker(VkPhysicalDevice hDevice)
 
 	return hDeviceUsage;
 }
-void destroy_DeviceUsageTracker(hVgDeviceQueueFamiliesUsage hDeviceUsage)
+void vgDestroy_DeviceUsageTracker(hVgDeviceQueueFamiliesUsage hDeviceUsage)
 {
 	free(hDeviceUsage->QueueFlags);
 	free(hDeviceUsage->pMaxQ);

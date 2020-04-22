@@ -6,26 +6,35 @@
 #include <GLFW/glfw3.h>
 #endif // !GLFW_INCLUDE_VULKAN
 
-//GLFW WINDOW
-GLFWwindow* init_create_GLFWwindow();
-void destroy_terminate_GLFWwindow(GLFWwindow* pMyWindow);
+#include "debug_settings.h"
+
+//GLFW WINDOW********************************************************************************************************************************
+GLFWwindow* vgInitCreate_GLFWwindow();
+void vgDestroyTerminate_GLFWwindow(GLFWwindow* pMyWindow);
 
 static _inline const char** get_GLFWExtension(uint32_t* pn_RequiredEXTs)
 {
 	return glfwGetRequiredInstanceExtensions(pn_RequiredEXTs);
 }
 
-//DEBUG MESSENGER
-VkDebugUtilsMessengerEXT create_DebugMessenger(VkInstance hInstance, const VkAllocationCallbacks* pAllocator);
-void destroy_DebugMessenger(VkInstance hInstance, VkDebugUtilsMessengerEXT DebugMessenger, const VkAllocationCallbacks* pAllocator);
+//VULKAN INSTANCE****************************************************************************************************************************
+VkInstance vgCreate_Instance(VkAllocationCallbacks* pAllocator, uint32_t n_BaseRequiredEXTs, const char** names_BaseRequiredExts);
+static _inline void vgDestroy_Instance(VkInstance hInstance, const VkAllocationCallbacks* pAllocator)
+{
+	vkDestroyInstance(hInstance, pAllocator);
+}
 
-VkDebugUtilsMessengerCreateInfoEXT fill_DebugMessengerInfo();
+//DEBUG MESSENGER****************************************************************************************************************************
+//pAllocator can be null
+VkDebugUtilsMessengerEXT vgCreate_DebugMessenger(VkInstance hInstance, const VkAllocationCallbacks* pAllocator);
+void vgDestroy_DebugMessenger(VkInstance hInstance, VkDebugUtilsMessengerEXT DebugMessenger, const VkAllocationCallbacks* pAllocator);
 
-//DEVICE USAGE TRACKER
+VkDebugUtilsMessengerCreateInfoEXT vgSet_DebugMessengerInfo();
 
-//going to use SoA for this.  If not required tis good practice.  right?
+//DEVICE USAGE TRACKER***********************************************************************************************************************
 struct VgDeviceQueueFamiliesUsage
 {
+	//going to use SoA.
 	//capabilities:
 	uint32_t N_QueueFamilies;
 	VkQueueFlags* QueueFlags;  //use this and the reference below to check capabilities when assigning queues
@@ -48,11 +57,12 @@ struct VgDeviceQueueFamiliesUsage
 	//} VkQueueFlagBits;
 };
 typedef struct VgDeviceQueueFamiliesUsage* hVgDeviceQueueFamiliesUsage;
-
 //this is to track usage.  Hopefully I will remember to require all functions that create queues to require this struct
-//don't think I need to take the address of the device because it is already a handle
-hVgDeviceQueueFamiliesUsage create_DeviceUsageTracker(VkPhysicalDevice hDevice);
-void destroy_DeviceUsageTracker(hVgDeviceQueueFamiliesUsage hDeviceUsage);
+hVgDeviceQueueFamiliesUsage vgCreate_DeviceUsageTracker(VkPhysicalDevice hDevice);
+void vgDestroy_DeviceUsageTracker(hVgDeviceQueueFamiliesUsage hDeviceUsage);
+
+
+
 
 #endif // !_VG_SETUP_H_
 
