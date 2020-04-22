@@ -10,21 +10,6 @@
 
 #include "vg_setup.h"
 
-
-
-//the below flag is for runtime checks of debug status in code, instead of compile time checks
-typedef enum
-{
-	RT_RELEASE = 0,
-	RT_DEBUG = 1
-}RtDebug;
-
-#ifdef DEBUG
-static const RtDebug RT_DEBUG_FLAG = RT_DEBUG;
-#else
-static const RtDebug RT_DEBUG_FLAG = RT_RELEASE;
-#endif // DEBUG
-
 typedef enum
 {
 	MISSING = 0,
@@ -201,6 +186,7 @@ void print_PhysicalDeviceLimits_v1_1(VkPhysicalDeviceLimits* pPhysicalDeviceLimi
 	printf("\n\toptimalBufferCopyRowPitchAlignment: %llu", pPhysicalDeviceLimits->optimalBufferCopyRowPitchAlignment);
 	printf("\n\tnonCoherentAtomSize: %llu", pPhysicalDeviceLimits->nonCoherentAtomSize);
 }
+
 void print_PhysicalDeviceFeatures_V1_1(VkPhysicalDeviceFeatures* pPhysicalDeviceFeatures)
 {
 	printf("\n\trobustBufferAccess: %u", pPhysicalDeviceFeatures->robustBufferAccess);
@@ -533,23 +519,26 @@ VkInstance create_Instance(VkAllocationCallbacks* pAllocator, uint32_t n_BaseReq
 {
 	VkApplicationInfo AppInfo = fill_AppInfo();
 	VkInstanceCreateInfo CreateInfo = fill_CreateInfo(&AppInfo, n_BaseRequiredEXTs, names_BaseRequiredExts);
-	if (RT_DEBUG_FLAG == RT_DEBUG)
-	{
-		addValidation_CreateInfo(&CreateInfo);  //adding the required validaiton layer(s)
-		addDebugExtensions_CreateInfo(&CreateInfo);
+#ifdef DEBUG
+	addValidation_CreateInfo(&CreateInfo);  //adding the required validaiton layer(s)
+	addDebugExtensions_CreateInfo(&CreateInfo);
 
-		//this is separate from the debug messenger created and destroyed after instance initialization
-		VkDebugUtilsMessengerCreateInfoEXT DebugMessenger_InstanceCreation = fill_DebugMessengerInfo();
-		CreateInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)& DebugMessenger_InstanceCreation;
-	}
+	//this is separate from the debug messenger created and destroyed after instance initialization
+	VkDebugUtilsMessengerCreateInfoEXT DebugMessenger_InstanceCreation = fill_DebugMessengerInfo();
+	CreateInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)& DebugMessenger_InstanceCreation;
+
 	VkInstance hInstance;
 	VkResult rezzy = vkCreateInstance(&CreateInfo, pAllocator, &hInstance);
-#ifdef DEBUG
+
 	if (rezzy != VK_SUCCESS)
 		printf("\nInstance creation failed!");
 	else
 		printf("\n\nyay");
+#else
+	VkInstance hInstance;
+	VkResult rezzy = vkCreateInstance(&CreateInfo, pAllocator, &hInstance);
 #endif // DEBUG
+
 	assert(rezzy == VK_SUCCESS);  //nothing wrond with being assertive here I think
 	return hInstance;
 }
@@ -558,16 +547,6 @@ _inline destroy_Instance(VkInstance hInstance, const VkAllocationCallbacks* pAll
 	vkDestroyInstance(hInstance, pAllocator);
 }
 //END SECTION: VULKAN ISNTANCE CREATE DESTROY
-
-
-
-
-//BEGIN SECTION: CREATE LOGICAL DEVICE
-
-//END SECTION: CREATE LOGICAL DEVICE
-
-
-
 
 //VkQueueFlags is a bitmask type for 0 or more VkQueueFlagBits
 void create_LogicalDevice(VkQueueFlags Flags)
